@@ -1,0 +1,33 @@
+{
+  "baseUrl": "${host}",
+  "key": "webhook-sample-bot",
+  "lifecycle": {
+    "installed": "/installed",
+    "uninstalled": "/uninstalled"
+  },
+  "modules": {
+    "chat:bot": [
+      {
+        "key": "hello-bot",
+        "mention": {
+          "url": "/bot-mention"
+        }
+      }
+    ],
+
+    "chat:webhook": [
+      {
+        "key": "refapp-webhook-conversation",
+        "event": "conversation:updates",
+        "url": "/conversation-updated"
+      },
+      {
+        "key": "refapp-webhook-roster",
+        "event": "roster:updates",
+        "url": "/roster-updated"
+      }
+    ]
+
+  }
+}
+

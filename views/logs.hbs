@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Stride Webhooks Logs</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.css" media="all"/>
+    <link rel="stylesheet" href="../public/css/dac2-site.css" media="all"/>
+
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.js"></script>
+
+    <script type="text/javascript">
+      $(document).ready(function() {
+          let ws = new WebSocket("ws://localhost:3333");
+          ws.onmessage = function(msg) {
+              let log = JSON.parse(msg.data);
+
+              let template = $('#log-template').html();
+              /*
+              let templateScript = Handlebars.compile(template);
+
+              let context = {
+                              'useCase': log.useCase,
+                              'docUrl': log.docUrl,
+                              'responseBody': log.responseBody
+                            };
+              */
+
+              console.log(JSON.stringify(log.responseBody, null, 4));
+              let html = template.replace('_useCase_', log.useCase)
+                                 .replace('_docUrl_', log.docUrl)
+                                 .replace('_responseBody_', JSON.stringify(log.responseBody, null, 4));
+              $('#logs').append(html);
+
+              $( ".log" ).on('click', function() {
+                          $(this).toggle();
+                        });
+          };
+      });
+    </script>
+
+    <script id="log-template">
+          <div class="log p-3">
+                <div class="aui-message note">
+                    <div class="icon"></div>
+                    <p class="title">
+                        <strong>Use Case: </strong>
+                       _useCase_
+                    </p>
+
+                    <p class="title">
+
+                        <a href="_docUrl_" target="_blank">Documentation</a>
+                    </p>
+
+                    <p class="title">
+                        <strong>Body</strong>
+
+                        <pre class="code">
+                          _responseBody_
+                        </pre>
+                    </p>
+                </div>
+            </div>
+      </script>
+</head>
+
+    <body>
+        <div class="page-content-and-footer">
+            <div class="page-content">
+                <div class="product-page">
+                    <div id="top-section p-5">
+                        <div id="header" class="product">
+                            <div>
+                                <div class="columns p-55">
+                                    <a href="https://developer.atlassian.com/cloud/stride/" target="_blank">
+                                        <h1 class="text-white">Stride Developer</h1>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flexible-column p-5">
+                        <div id="logs">
+                          <div class="p-3">
+                                <div class="aui-message note">
+                                    <div class="icon"></div>
+                                    <p class="title">
+                                        <strong>Hello World! </strong>
+
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer id="footer" class="product">
+                <div class="heading row large-12 columns">
+                    <div class="footer-bar"><div class="footer-bar-left"><a href="/"><span class="logo"></span></a></div>
+                        <div class="footer-bar-right">
+                            <ul class="menu">
+                                <li><a href="https://status.developer.atlassian.com">System status</a></li><li><a href="https://www.atlassian.com/legal/privacy-policy">Privacy</a></li><li><a href="https://developer.atlassian.com/market/atlassian-developer-terms">Developer Terms</a></li><li><a href=" https://www.atlassian.com/legal/trademark">Trademark</a></li><li class="menu-text copyright">© 2018 Atlassian</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </body>
+
+</html>
