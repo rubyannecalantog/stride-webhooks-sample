@@ -1,10 +1,4 @@
-const PORT = 3333;
-
-if (!PORT) {
-  console.log("Usage:");
-  console.log("PORT=<http port> node app.js");
-  process.exit();
-}
+require('dotenv').config();
 
 const _ = require('lodash');
 const fs = require('fs');
@@ -12,6 +6,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const http = require('http');
 const path = require('path');
+const request = require('request');
+const prettyjson = require('prettyjson');
+const opn = require('opn');
 
 const app = express();
 app.use(bodyParser.json());
@@ -30,14 +27,16 @@ app.set('views', path.join(__dirname, 'views'));
 app.engine('hbs', exphbs.engine);
 app.set('view engine', 'hbs');
 
-var server = http.createServer(app).listen(PORT, function () {
-  console.log(`App running on port ${PORT}. Open http://localhost:${PORT}/logs to view real time logs from webhooks. This is an in memory persistence only.`);
-  var host = server.address().address
-  var port = server.address().port
+var server = http.createServer(app).listen(process.env.PORT, function () {
+    var logsUrl = `http://localhost:${process.env.PORT}/logs`;
+  console.log(`App running on port ${process.env.PORT}. Open ${logsUrl} to view real time logs from webhooks. This is an in memory persistence only.`);
+
+  opn(logsUrl);
 });
 
-const CLIENT_ID = 'ZTS66UGBjC737l1v45J3htdoXowucJdx';
-const CLIENT_SECRET = '5tFOBL431M5AX3BSc6ScBZHnQLobt66cAf43QVDwcUn3bospIlbDAtDHxga8gX5D';
+const CLIENT_ID = process.env.CLIENT_ID;
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
+const API_BASE_URL = 'https://api.atlassian.com';
 
 const stride = require('./lib/stride.js').factory({
   clientId: CLIENT_ID,
@@ -67,6 +66,111 @@ setInterval(() => {
   ws.ping(null, false, true);
 });
 }, 10000);*/
+
+function prettify_json(data, options = {}) {
+    return '{\n' + prettyjson.render(data, options) + '\n}';
+}
+
+function getAccessToken(callback) {
+    const options = {
+        uri: 'https://auth.atlassian.com/oauth/token',
+        method: 'POST',
+        json: {
+            grant_type: "client_credentials",
+            client_id: CLIENT_ID,
+            client_secret: CLIENT_SECRET,
+            "audience": "api.atlassian.com"
+        }
+    };
+    request(options, function (err, response, body) {
+        if (response.statusCode === 200 && body.access_token) {
+            callback(null, body.access_token);
+        } else {
+            callback("could not generate access token: " + JSON.stringify(response));
+        }
+    });
+}
+
+function sendMessage(cloudId, conversationId, messageTxt, callback) {
+    getAccessToken(function (err, accessToken) {
+        if (err) {
+            callback(err);
+        } else {
+            const uri = API_BASE_URL + '/site/' + cloudId + '/conversation/' + conversationId + '/message';
+            const options = {
+                uri: uri,
+                method: 'POST',
+                headers: {
+                    authorization: "Bearer " + accessToken,
+                    "cache-control": "no-cache"
+                },
+                json: {
+                    body: {
+                        version: 1,
+                        type: "doc",
+                        content: [
+                            {
+                                type: "paragraph",
+                                content: [
+                                    {
+                                        type: "text",
+                                        text: messageTxt
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+
+            request(options, function (err, response, body) {
+                callback(err, body);
+            });
+        }
+    });
+}
+
+function sendReply(message, replyTxt, callback) {
+    const cloudId = message.cloudId;
+    const conversationId = message.conversation.id;
+    const userId = message.sender.id;
+
+    console.log('cloudId: ' + cloudId + ';conversationId: ' + conversationId + ';userId: ' + userId)
+
+    sendMessage(cloudId, conversationId, replyTxt, function (err, response) {
+        if (err) {
+            console.log('Error sending message: ' + err);
+            callback(err);
+        } else {
+            callback(null, response);
+        }
+    });
+}
+
+app.post('/installed',
+    function (req, res) {
+        console.log('app installed in a conversation');
+        const cloudId = req.body.cloudId;
+        const conversationId = req.body.resourceId;
+        sendMessage(cloudId, conversationId, "Hi there! Thanks for adding me to this conversation. To see me in action, just mention me in a message", function (err, response) {
+            if (err)
+                console.log(err);
+        });
+        res.sendStatus(204);
+
+        console.log("Logging installed");
+        let _log = {
+            useCase: `App installed in cloudId: ${cloudId} and conversationId: ${conversationId}`,
+            responseDescription: "Conversation Event Response",
+            urlFriendlyName: "Lifecycle",
+            docUrl: "https://developer.atlassian.com/cloud/stride/apis/modules/chat/webhook/",
+            responseBody: req.body
+        }
+
+        _logs.push(_log);
+        publishLog(_log);
+    }
+);
 
 app.post('/bot-mention',
   function (req, res) {
@@ -122,11 +226,8 @@ app.post('/roster-updated',
             _logs.push(_log);
             res.sendStatus(200);
 
-            console.log(`Sending to WebSockets: ${wss.clients}`);
-
             publishLog(_log);
 
-            console.error(`error found sending webhook response for conversation update: ${err}`);
             //throw err;
         } catch (err) {
           console.error(`error found sending webhook response for conversation update: ${err}`);
@@ -154,7 +255,6 @@ app.post('/conversation-updated',
       _logs.push(_log);
       res.sendStatus(200);
 
-      console.log(`Sending to WebSockets: ${wss.clients}`);
       publishLog(_log)
 
     } catch (err) {
@@ -166,10 +266,12 @@ app.post('/conversation-updated',
 );
 
 function publishLog(_log) {
-  try{
+    console.log(`Sending to WebSockets: ${prettify_json(JSON.stringify(wss.clients))}`);
+
+    try{
     wss.clients.forEach(function each(client) {
-      console.log(`Sending to WebSockets: ${client}; with log: ${JSON.stringify(_log)}`);
-      client.send(JSON.stringify(_log));
+      console.log(`Sending to WebSockets: ${client}; with log: ${JSON.stringify(_log, undefined, 2)}`);
+      client.send(JSON.stringify(_log, undefined, 2));
     });
   } catch(err) {
     console.log(err);
