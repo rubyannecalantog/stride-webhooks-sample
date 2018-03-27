@@ -31,7 +31,13 @@ This repo is the companion code to the Stride tutorial:
 4. Run `$ npm install` to install node modules
 5. Once the dependencies are install, run `$ npm start` to start the app
 6. Make sure to open browser first (`http://localhost:<PORT>/logs`) before installing in Stride
-7. Run ngrok on `<PORT>` and install `/descriptor` in developer.atlassian.com
+7. Run ngrok on `<PORT>` and test in browser: `<ngrokUrl>/descriptor` 
+8. Install `<ngrokUrl>/descriptor` in developer.atlassian.com
+9. Copy installation URL and install it in Stride app
+
+#### How to test
+1. `roster event` : test by adding or removing people in a conversation and see live changes in `/logs`
+2. `conversation event` : test by archiving or updating privacy of a conversation
 
 #### Endpoints:
 * `POST /bot-mention` - Called by Stride whenever a bot is installed or mentioned in a conversation
