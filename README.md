@@ -41,4 +41,4 @@ This repo is the companion code to the Stride tutorial:
 
 
 #### Logs:
-![Alt text](resources/localhost-logs.png?raw=true "Logs")
+![Alt text](public/img/localhost-logs.png?raw=true "Logs")
