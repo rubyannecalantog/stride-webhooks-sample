@@ -30,7 +30,7 @@ This repo is the companion code to the Stride tutorial:
 3. Make sure that you're using Node 8 as we're using ES6
 4. Run `$ npm install` to install node modules
 5. Once the dependencies are install, run `$ npm start` to start the app
-6. 
+6. Make sure to open browser first (`http://localhost:<PORT>/logs`) before installing in Stride
 
 #### Endpoints:
 * `POST /bot-mention` - Called by Stride whenever a bot is installed or mentioned in a conversation
