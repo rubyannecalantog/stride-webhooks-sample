@@ -7,14 +7,15 @@ const bodyParser = require('body-parser');
 const http = require('http');
 const path = require('path');
 const request = require('request');
-const prettyjson = require('prettyjson');
+
+const util = require('./lib/util.js');
+
 const opn = require('opn');
 
 const app = express();
 app.use(bodyParser.json());
 app.use(express.static('.'));
 
-//view engine
 var exphbs = require('express-handlebars').create({
   layoutsDir: path.join(__dirname, 'views'),
   //partialsDir: path.join(__dirname, 'views/partials'),
@@ -28,7 +29,7 @@ app.engine('hbs', exphbs.engine);
 app.set('view engine', 'hbs');
 
 var server = http.createServer(app).listen(process.env.PORT, function () {
-    var logsUrl = `http://localhost:${process.env.PORT}/logs`;
+  var logsUrl = `http://localhost:${process.env.PORT}/logs`;
   console.log(`App running on port ${process.env.PORT}. Open ${logsUrl} to view real time logs from webhooks. This is an in memory persistence only.`);
 
   opn(logsUrl);
@@ -45,31 +46,8 @@ const stride = require('./lib/stride.js').factory({
 
 const WebSocketServer = require('ws').Server;
 const wss = new WebSocketServer({ server: server });
-//const wss = new WebSocketServer({ port: '9090' });
-/*
-wss.on('connection', (ws: ExtWebSocket) => {
 
-  ws.isAlive = true;
 
-  ws.on('pong', () => {
-    ws.isAlive = true;
-
-  });
-});
-
-setInterval(() => {
-  wss.clients.forEach((ws: ExtWebSocket) => {
-
-  if (!ws.isAlive) return ws.terminate();
-
-  ws.isAlive = false;
-  ws.ping(null, false, true);
-});
-}, 10000);*/
-
-function prettify_json(data, options = {}) {
-    return '{\n' + prettyjson.render(data, options) + '\n}';
-}
 
 function getAccessToken(callback) {
     const options = {
@@ -266,12 +244,12 @@ app.post('/conversation-updated',
 );
 
 function publishLog(_log) {
-    console.log(`Sending to WebSockets: ${prettify_json(JSON.stringify(wss.clients))}`);
+    console.log(`Sending to WebSockets: ${util.prettify_jsonObj(wss.clients)}`);
 
     try{
     wss.clients.forEach(function each(client) {
-      console.log(`Sending to WebSockets: ${client}; with log: ${JSON.stringify(_log, undefined, 2)}`);
-      client.send(JSON.stringify(_log, undefined, 2));
+      console.log(`Sending to WebSockets: ${client}; with log: ${util.format_jsonObj(_log)}`);
+      client.send(util.format_jsonObj(_log));
     });
   } catch(err) {
     console.log(err);
