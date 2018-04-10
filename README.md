@@ -17,6 +17,19 @@ This repo is the companion code to the Stride tutorial:
 * Stride developer portal https://developer.atlassian.com/cloud/stride/
 * General on Stride Apps and concepts https://developer.atlassian.com/cloud/stride/integrating-with-stride/
 * Guide for a first app https://developer.atlassian.com/cloud/stride/getting-started/
+* Stride Webhooks: https://developer.atlassian.com/cloud/stride/apis/modules/chat/webhook/
+
+
+#### What is this for?
+This app aims to demonstrate the flow of a Stride's webhook and requests bins received when getting the webhooks
+
+#### Webhook events
+1. roster:updates - triggered when a user joined or left a conversation. This will invoke the `POST /roster-updated` of the app
+2. conversation:updates - triggered when the conversation was created, modified, archived or deleted. This will invoke the `POST /conversation-updated` of the app
+
+#### How it does it
+1. When you `npm run` the app, the app opens a browser and displays the request bin page for you to look into.
+2. When the app is installed in a Stride room, any event that qualifies as roster change or conversation update would display the webhook's request bin in the console log and the browser page `/logs` from 1. For instance a person left the room, a webhook event is sent to the app's `/roster-updated`, where the requests are displayed both in the console logs and in the  `/logs` displayed in number 1.  Same case when a room is archived, the request bin for the conversation-update event is displayed. 
 
 #### Prerequisites:
 * NodeJs 8
