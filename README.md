@@ -1,24 +1,4 @@
-# Stride API tutorial
-
-This repo is the companion code to the Stride tutorial:
-1. https://developer.atlassian.com/cloud/stride/getting-started/
-2. https://developer.atlassian.com/cloud/stride/learning/explore-refapp/
-
-**node 8 ** This code uses the cool features of recent JavaScript💛.  For a quick refresh: https://devhints.io/es6
-
-
-#### Reference documentation:
-* Stride API https://developer.atlassian.com/cloud/stride/rest/
-* ADF - Atlassian Document Format https://developer.atlassian.com/cloud/stride/apis/document/structure/
-  * see also https://bitbucket.org/atlassian/adf-builder-javascript#readme
-* Manage your Stride apps https://developer.atlassian.com/apps/
-
-#### Useful links:
-* Stride developer portal https://developer.atlassian.com/cloud/stride/
-* General on Stride Apps and concepts https://developer.atlassian.com/cloud/stride/integrating-with-stride/
-* Guide for a first app https://developer.atlassian.com/cloud/stride/getting-started/
-* Stride Webhooks: https://developer.atlassian.com/cloud/stride/apis/modules/chat/webhook/
-
+# Stride Webhooks tutorial
 
 #### What is this for?
 This app aims to demonstrate the flow of a Stride's webhook and requests bins received when getting the webhooks
@@ -29,6 +9,7 @@ This app aims to demonstrate the flow of a Stride's webhook and requests bins re
 
 #### How it does it
 1. When you `npm run` the app, the app opens a browser and displays the request bin page for you to look into.
+![Alt text](public/img/localhost-logs.png?raw=true "Logs")
 2. When the app is installed in a Stride room, any event that qualifies as roster change or conversation update would display the webhook's request bin in the console log and the browser page `/logs` from 1. For instance a person left the room, a webhook event is sent to the app's `/roster-updated`, where the requests are displayed both in the console logs and in the  `/logs` displayed in number 1.  Same case when a room is archived, the request bin for the conversation-update event is displayed. 
 
 #### Prerequisites:
@@ -60,5 +41,26 @@ This app aims to demonstrate the flow of a Stride's webhook and requests bins re
 * `POST /conversation-updated` - Endpoint for the conversation-updated webhook event to be called by Stride
 
 
-#### Logs:
-![Alt text](public/img/localhost-logs.png?raw=true "Logs")
+
+
+This repo is the companion code to the Stride tutorial:
+1. https://developer.atlassian.com/cloud/stride/getting-started/
+2. https://developer.atlassian.com/cloud/stride/learning/explore-refapp/
+
+**node 8 ** This code uses the cool features of recent JavaScript💛.  For a quick refresh: https://devhints.io/es6
+
+
+#### Reference documentation:
+* Stride API https://developer.atlassian.com/cloud/stride/rest/
+* ADF - Atlassian Document Format https://developer.atlassian.com/cloud/stride/apis/document/structure/
+  * see also https://bitbucket.org/atlassian/adf-builder-javascript#readme
+* Manage your Stride apps https://developer.atlassian.com/apps/
+
+#### Useful links:
+* Stride developer portal https://developer.atlassian.com/cloud/stride/
+* General on Stride Apps and concepts https://developer.atlassian.com/cloud/stride/integrating-with-stride/
+* Guide for a first app https://developer.atlassian.com/cloud/stride/getting-started/
+* Stride Webhooks: https://developer.atlassian.com/cloud/stride/apis/modules/chat/webhook/
+
+
+
